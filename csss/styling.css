@@ -1,0 +1,38 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+svg {
+  background: #eee;
+  width: 100%;
+  height: 100%;
+}
+.sphere {
+  fill: #305B85;
+}
+
+.land {
+  fill: #F4F5ED;
+}
+.wavedot2 {
+  fill: #89CEDE;
+}
+.wavedot {
+  fill: #305B85;
+}
+.boundary {
+  fill: none;
+  stroke: #C7C9BE;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.overlay {
+  fill: none;
+  pointer-events: all;
+  width: 100%;
+  height: 100%;
+}
