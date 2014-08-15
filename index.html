@@ -4,21 +4,40 @@
 <script src="js/d3.v3.min.js"></script>
 <script src="js/topojson.v1.min.js"></script>
 <script src="js/three.min.js"></script>
-<script src="data/wave_new-ec2.js"></script>
+<script src="data/wave_northamerica_sm.js"></script>
 <link rel="stylesheet" href="csss/styling.css">
 
+<html>
 <body>
+  <input type="button" id='stopbut' value="Stop" style=" width: 50px; " onclick="stopstartTimer()" />
+  <b>Wave Watch 3: </b>
+  <input type="text" id='tme' />
+  <b>Number of Points: 8,206</b>
+</body>
+</html>
 <script>
 
+var numofwaveintervals = 11;
 var camera, scene, renderer;
 var width = 960,
     fullPage = '100%',
     height = 960;
-    topx= 2500,
-    lefty= 1500,
-    scale0 = 5000  / Math.PI;
+    topx= 1600,
+    lefty= 700,
+    scale0 = 2200  / Math.PI;
 var projection = d3.geo.mercator();
 
+//Range of Color for wave height
+var colour = d3.scale.linear()
+                //this effects the range of the data 
+                //and the visualization of the color gradient
+                .domain([0, 1400])
+                .range(["lightblue", "red"]);
+
+//cycle through wave time data
+var looper=setInterval(function(){loopTimer()},800);
+
+//zoom inggg
 var zoom = d3.behavior.zoom()
     .translate([topx, lefty])
     .scale(scale0)
@@ -33,47 +52,88 @@ var svg = d3.select("body").append("svg")
     //.attr("height", d3.select("body").height)
   .append("g");
 
-var g = svg.append("g");
-
-svg.append("rect")
-    .attr("class", "overlay")
-    //.attr("width", fullPage)
-    //.attr("height", fullPage);
-
 svg
     .call(zoom)
     .call(zoom.event);
 
-//d3.json("data/world-50m.txt", function(error, world) {
-d3.json("data/world-110m.txt", function(error, world) {
-  g.append("path")
+//variable to set wave data source (time)
+var waveData = wavepts0;
+
+//d3.json("data/land/world-50m.txt", function(error, world) {
+d3.json("data/land/world-110m.txt", function(error, world) {
+  svg.append("path")
       .datum({type: "Sphere"})
       .attr("class", "sphere")
       .attr("d", path);
 
-  g.append("path")
+  svg.append("path")
       .datum(topojson.merge(world, world.objects.countries.geometries))
       .attr("class", "land")
       .attr("d", path);
 
-  g.append("path")
+  svg.append("path")
       .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
       .attr("class", "boundary")
       .attr("d", path);
-});
-
-
-//throw the points on the map
-/*svg.selectAll(".pin")
-    .data(wavepts)
-  .enter().append("circle", ".pin")
-    .attr("r", 5)
+  
+  //throw the points on the map  after for ordering purposes
+  svg.selectAll(".pin")
+    .data(waveData)
+  .enter().append("circle")
+    .attr("r", 2)
+    .attr("fill", function(d){return d?colour(d[3]*500):"black";})
+    .attr("stroke", function(d){return d?colour(d[3]*500):"black";})
     .attr("transform", function(d) {
       return "translate(" + projection([
         d[2],
         d[1]
       ]) + ")"
-    })*/
+    })
+
+});
+
+//update wavedata
+var loopinterval = 0;
+function loopTimer() {
+    loopinterval = loopinterval+1;
+    //newwavedata = 'wavepts'+loopinterval
+    waveData = this.window['wavepts'+loopinterval];
+    
+    //this depends on the number of time intervals.
+    if(loopinterval>numofwaveintervals){
+      loopinterval=0;
+    }
+    
+    
+
+    svg.selectAll('circle').remove();
+    svg.selectAll(".pin")
+      .data(waveData)
+      .enter().append("circle")
+      .attr("r", 2)
+      .attr("fill", function(d){return d?colour(d[3]*500):"black";})
+      .attr("stroke", function(d){return d?colour(d[3]*500):"black";})
+      .attr("transform", function(d) {
+        //text date
+        document.getElementById("tme").value = d[0];
+        return "translate(" + projection([
+          d[2],
+          d[1]
+        ]) + ")"
+      })
+}
+
+function stopstartTimer(){
+  if(document.getElementById("stopbut").value == 'Stop'){
+    clearInterval(looper);
+    document.getElementById("stopbut").value = 'Start';
+  }
+  else{
+    looper=setInterval(function(){loopTimer()},800);
+    document.getElementById("stopbut").value = 'Stop';
+  }
+
+}
 
 //map zoom control
 function zoomed() {
@@ -81,8 +141,20 @@ function zoomed() {
       .translate(zoom.translate())
       .scale(zoom.scale());
 
-  g.selectAll("path")
+  svg.selectAll("path")
       .attr("d", path);
+
+  svg.selectAll("circle")
+     //preserve color range
+    .attr("fill", function(d){return d?colour(d[3]*500):"black";})
+    .attr("stroke", function(d){return d?colour(d[3]*500):"black";})
+    
+    .attr("transform", function(d) {  
+      return "translate(" + projection([
+        d[2],
+        d[1]
+      ]) + ")"
+    })
 }
 
 //start webGL scene
@@ -133,11 +205,11 @@ function initScene() {
     } );
     
     particles = new Array();
-    for ( var iy = 0; iy < wavepts; iy ++ ) {
+    for ( var iy = 0; iy < wavepts0; iy ++ ) {
 
         particle = particles[ i ++ ] = new THREE.Sprite( material );
-        particle.position.x = wavepts[iy][2] * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 2 );
-        particle.position.z = wavepts[iy][2] * SEPARATION - ( ( AMOUNTY * SEPARATION ) / 2 );
+        particle.position.x = wavepts0[iy][2] * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 2 );
+        particle.position.z = wavepts0[iy][2] * SEPARATION - ( ( AMOUNTY * SEPARATION ) / 2 );
         scene.add( particle );
 
     }
@@ -233,11 +305,7 @@ function addGeoObject() {
   }
 
 
-
-
-
 //Let's gooo0
-initScene();
-
+//initScene();
 
 </script>
