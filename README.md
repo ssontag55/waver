@@ -1,13 +1,19 @@
-
 waver
-
 =====
 
 
-Haha, You think you are going to get documentation...
+WebGL and D3 animation
 
-There are beers to be drank..
+http://mapblender.com/waver/globe/
+
+http://mapblender.com/waver/
 
 
-http://mapblender.com/waver/globe/waver.jpg
+Analyzing Wave Data from Wave Watch 3 during the month August 2014
 
+
+Python script for converting JSON data.
+
+
+
+![ScreenShot](/data/waver.jpg)
