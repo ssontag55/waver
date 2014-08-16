@@ -35,7 +35,7 @@ var colour = d3.scale.linear()
                 .range(["lightblue", "red"]);
 
 //cycle through wave time data
-var looper=setInterval(function(){loopTimer()},800);
+var looper=setInterval(function(){loopTimer()},700);
 
 //zoom inggg
 var zoom = d3.behavior.zoom()
@@ -104,7 +104,6 @@ function loopTimer() {
       loopinterval=0;
     }
     
-    
 
     svg.selectAll('circle').remove();
     svg.selectAll(".pin")
@@ -129,7 +128,7 @@ function stopstartTimer(){
     document.getElementById("stopbut").value = 'Start';
   }
   else{
-    looper=setInterval(function(){loopTimer()},800);
+    looper=setInterval(function(){loopTimer()},700);
     document.getElementById("stopbut").value = 'Stop';
   }
 
@@ -183,7 +182,10 @@ function initScene() {
     renderer.setClearColor(0x000);
 
     // add the render target to the page
-    //$("#chart").append(renderer.domElement);
+    container = document.createElement( 'div' );
+    document.body.appendChild( container );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    container.appendChild( renderer.domElement );
 
     // add a light at a specific position
     /*var pointLight = new THREE.PointLight(0xFFFFFF);
@@ -193,7 +195,7 @@ function initScene() {
     pointLight.position.z = 800;*/
 
     var PI2 = Math.PI * 2;
-        var material = new THREE.SpriteCanvasMaterial( {
+    var material = new THREE.SpriteCanvasMaterial( {
 
           color: 0xffffff,
           program: function ( context ) {
@@ -204,12 +206,16 @@ function initScene() {
           }
     } );
     
+    var SEPARATION = 100, AMOUNTX = 50, AMOUNTY = 50;
+
     particles = new Array();
-    for ( var iy = 0; iy < wavepts0; iy ++ ) {
+    var i = 0;
+    for ( var iy = 0; iy < wavepts0.length; iy ++ ) {
 
         particle = particles[ i ++ ] = new THREE.Sprite( material );
-        particle.position.x = wavepts0[iy][2] * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 2 );
-        particle.position.z = wavepts0[iy][2] * SEPARATION - ( ( AMOUNTY * SEPARATION ) / 2 );
+        particle.position.x = wavepts0[iy][1] * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 2 );
+        particle.position.y = wavepts0[iy][2] * SEPARATION - ( ( AMOUNTY * SEPARATION ) / 2 );
+        particle.position.z = wavepts0[iy][3] * SEPARATION - ( ( AMOUNTY * SEPARATION ) / 2 );
         scene.add( particle );
 
     }
@@ -220,10 +226,9 @@ function initScene() {
     var plane = new THREE.Mesh(planeGeo, planeMat);
 
     // rotate it to correct position
-    plane.rotation.x = -Math.PI/2;
-    scene.add(plane);
+    //plane.rotation.x = -Math.PI/2;
+    //scene.add(plane);
     renderer.render( scene, camera );
-
 }
 
 function addGeoObject() {
@@ -241,8 +246,8 @@ function addGeoObject() {
     var minValueTotal = -1;
 
     // convert to mesh and calculate values
-    for (var i = 0 ; i < wavepts.length ; i++) {
-        var geoFeature = data.features[i]
+    for (var i = 0 ; i < wavepts0.length ; i++) {
+        var geoFeature = wavepts0[i];
         var feature = geo.point(geoFeature);
         // we only need to convert it to a three.js path
         var mesh = transformSVGPathExposed(feature);
@@ -307,5 +312,6 @@ function addGeoObject() {
 
 //Let's gooo0
 //initScene();
+//addGeoObject();
 
 </script>

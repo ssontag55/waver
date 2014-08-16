@@ -1,0 +1,110 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <title>Waver Globe</title>
+    <meta charset="utf-8">
+    
+  </head>
+  <body>
+
+  <div id="container"></div>
+
+  <div id="info">
+    <b>Number of Points: 8,206</b>
+    <input type="button" id='stopbut' value="Stop" style=" width: 50px; " onclick="stopstartTimer()" />
+    <input type="text" id='tme' />
+  </div>
+
+  <!-- <div id="currentInfo">
+    <span id="year1990" class="year">1990</span>
+    <span id="year1995" class="year">1995</span>
+    <span id="year2000" class="year">2000</span>
+  </div> -->
+
+  <div id="title">
+    Significant Wave Height
+
+  </div>
+  <!-- <b>Wave Watch 3 </b> -->
+
+  <script type="text/javascript" src="third-party/Detector.js"></script>
+  <script type="text/javascript" src="third-party/three.min.js"></script>
+  <script type="text/javascript" src="third-party/Tween.js"></script>
+  <script type="text/javascript" src="globe.js"></script>
+  <script src="../data/wave_northamerica_sm.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script type="text/javascript">
+
+    if(!Detector.webgl){
+      Detector.addGetWebGLMessage();
+    } else {
+
+      var container = document.getElementById('container');
+      var globe = new DAT.Globe(container);
+
+      //not necessary
+      var fullDateList = ["2014-08-14T00:00:00Z","2014-08-14T06:00:00Z","2014-08-14T12:00:00Z","2014-08-14T18:00:00Z","2014-08-15T00:00:00Z","2014-08-15T06:00:00Z","2014-08-15T12:00:00Z","2014-08-15T18:00:00Z","2014-08-16T00:00:00Z","2014-08-16T06:00:00Z","2014-08-16T12:00:00Z","2014-08-16T18:00:00Z","2014-08-17T00:00:00Z"];
+
+      var i, tweens = [];
+      
+      var settime = function(globe, t) {
+        return function() {
+          new TWEEN.Tween(globe).to({time: t/fullDateList.length},500).easing(TWEEN.Easing.Cubic.EaseOut).start();
+          
+        };
+      };
+            
+      TWEEN.start();
+      
+      var xhr;
+      xhr = new XMLHttpRequest();
+      xhr.open('GET', '../data/wave_northamerica_webgl.txt', true);
+      xhr.onreadystatechange = function(e) {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            var data = JSON.parse(xhr.responseText);
+            window.data = data;
+            for (i=0;i<data.length;i++) {
+              globe.addData(data[i][1], {format: 'magnitude', name: data[i][0], animated: true});
+            }
+            globe.createPoints();
+            //settime(globe,0)();
+            globe.animate();
+            document.body.style.backgroundImage = 'none'; // remove loading
+          }
+        }
+      };
+      xhr.send(null);
+    }
+
+
+    //cycle through wave time data
+    var looper=setInterval(function(){loopTimer()},600);
+
+    //update wavedata
+    var loopinterval = 0;
+    var numofwaveintervals = 11;
+    function loopTimer() {
+        loopinterval = loopinterval+1;
+        document.getElementById("tme").value = fullDateList[loopinterval];
+        settime(globe,loopinterval)();
+        //this depends on the number of time intervals.
+        if(loopinterval>numofwaveintervals){
+          loopinterval=0;
+        }
+    }
+
+    function stopstartTimer(){
+      if(document.getElementById("stopbut").value == 'Stop'){
+        clearInterval(looper);
+        document.getElementById("stopbut").value = 'Start';
+      }
+      else{
+        looper=setInterval(function(){loopTimer()},600);
+        document.getElementById("stopbut").value = 'Stop';
+      }
+
+    }
+  </script>
+  </body>
+</html>
