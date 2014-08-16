@@ -15,5 +15,5 @@ Analyzing Wave Data from Wave Watch 3 during the month August 2014
 Python script for converting JSON data.
 
 
-http://mapblender.com/waver/globe/waver.jpg
+![ScreenShot](http://mapblender.com/waver/globe/waver.jpg)
 
